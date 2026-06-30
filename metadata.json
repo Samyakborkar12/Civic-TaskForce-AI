@@ -1,0 +1,6 @@
+{
+  "name": "Civic Taskforce AI",
+  "description": "AI-Powered Hyperlocal Civic Issue Detection, Resolution & Smart Governance System",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
