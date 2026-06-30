@@ -43,58 +43,155 @@ if (!fs.existsSync(DATA_DIR)) {
 }
 
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const USER_FILE = path.join(DATA_DIR, 'user.json');
 const SESSIONS_FILE = path.join(DATA_DIR, 'sessions.json');
 const ISSUES_FILE = path.join(DATA_DIR, 'issues.json');
 
-// Initialize database files if missing
-if (!fs.existsSync(USERS_FILE)) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify([], null, 2));
-}
-if (!fs.existsSync(SESSIONS_FILE)) {
-  fs.writeFileSync(SESSIONS_FILE, JSON.stringify({}, null, 2));
+// Backup file paths for ultimate resilience and recovery
+const USERS_BAK = path.join(DATA_DIR, 'users.json.bak');
+const USER_BAK = path.join(DATA_DIR, 'user.json.bak');
+const SESSIONS_BAK = path.join(DATA_DIR, 'sessions.json.bak');
+const ISSUES_BAK = path.join(DATA_DIR, 'issues.json.bak');
+
+// Helper to safely write files and maintain active backups
+function safeWriteFile(filePath: string, backupPath: string, content: string) {
+  try {
+    fs.writeFileSync(filePath, content, 'utf-8');
+    fs.writeFileSync(backupPath, content, 'utf-8');
+  } catch (err) {
+    console.error(`Error writing file ${filePath}:`, err);
+  }
 }
 
 // Import initial issues dynamically to seed if not already present
 import { initialIssues } from './src/mockData.ts';
-if (!fs.existsSync(ISSUES_FILE)) {
-  fs.writeFileSync(ISSUES_FILE, JSON.stringify(initialIssues, null, 2));
+
+// Initialize and recover user databases (users.json and user.json)
+let initialUsersList: any[] = [];
+if (fs.existsSync(USERS_FILE)) {
+  try {
+    initialUsersList = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+  } catch (e) {
+    if (fs.existsSync(USERS_BAK)) {
+      try {
+        initialUsersList = JSON.parse(fs.readFileSync(USERS_BAK, 'utf-8'));
+      } catch (inner) {}
+    }
+  }
+} else if (fs.existsSync(USER_FILE)) {
+  try {
+    initialUsersList = JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+  } catch (e) {
+    if (fs.existsSync(USER_BAK)) {
+      try {
+        initialUsersList = JSON.parse(fs.readFileSync(USER_BAK, 'utf-8'));
+      } catch (inner) {}
+    }
+  }
 }
 
-// Helper accessors
+// If user records are empty or corrupt, we restore active registered citizens from backup or default empty list
+if (!Array.isArray(initialUsersList)) {
+  initialUsersList = [];
+}
+
+// Ensure both database representations and their backups are synchronized
+fs.writeFileSync(USERS_FILE, JSON.stringify(initialUsersList, null, 2), 'utf-8');
+fs.writeFileSync(USER_FILE, JSON.stringify(initialUsersList, null, 2), 'utf-8');
+fs.writeFileSync(USERS_BAK, JSON.stringify(initialUsersList, null, 2), 'utf-8');
+fs.writeFileSync(USER_BAK, JSON.stringify(initialUsersList, null, 2), 'utf-8');
+
+// Initialize and recover active sessions database
+let initialSessionsObj: any = {};
+if (fs.existsSync(SESSIONS_FILE)) {
+  try {
+    initialSessionsObj = JSON.parse(fs.readFileSync(SESSIONS_FILE, 'utf-8'));
+  } catch (e) {
+    if (fs.existsSync(SESSIONS_BAK)) {
+      try {
+        initialSessionsObj = JSON.parse(fs.readFileSync(SESSIONS_BAK, 'utf-8'));
+      } catch (inner) {}
+    }
+  }
+}
+fs.writeFileSync(SESSIONS_FILE, JSON.stringify(initialSessionsObj, null, 2), 'utf-8');
+fs.writeFileSync(SESSIONS_BAK, JSON.stringify(initialSessionsObj, null, 2), 'utf-8');
+
+// Initialize and recover municipal issue databases
+let initialIssuesList: any[] = initialIssues;
+if (fs.existsSync(ISSUES_FILE)) {
+  try {
+    initialIssuesList = JSON.parse(fs.readFileSync(ISSUES_FILE, 'utf-8'));
+  } catch (e) {
+    if (fs.existsSync(ISSUES_BAK)) {
+      try {
+        initialIssuesList = JSON.parse(fs.readFileSync(ISSUES_BAK, 'utf-8'));
+      } catch (inner) {}
+    }
+  }
+}
+fs.writeFileSync(ISSUES_FILE, JSON.stringify(initialIssuesList, null, 2), 'utf-8');
+fs.writeFileSync(ISSUES_BAK, JSON.stringify(initialIssuesList, null, 2), 'utf-8');
+
+// Helper accessors for dynamic operations
 function loadUsers(): any[] {
   try {
-    return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+    if (fs.existsSync(USERS_FILE)) {
+      return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+    } else if (fs.existsSync(USER_FILE)) {
+      return JSON.parse(fs.readFileSync(USER_FILE, 'utf-8'));
+    }
+    return [];
   } catch (e) {
+    try {
+      if (fs.existsSync(USERS_BAK)) {
+        return JSON.parse(fs.readFileSync(USERS_BAK, 'utf-8'));
+      }
+    } catch (inner) {}
     return [];
   }
 }
 
 function saveUsers(users: any[]) {
-  fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  const content = JSON.stringify(users, null, 2);
+  safeWriteFile(USERS_FILE, USERS_BAK, content);
+  safeWriteFile(USER_FILE, USER_BAK, content);
 }
 
 function loadSessions(): Record<string, { userId: string; expiresAt: string }> {
   try {
     return JSON.parse(fs.readFileSync(SESSIONS_FILE, 'utf-8'));
   } catch (e) {
+    try {
+      if (fs.existsSync(SESSIONS_BAK)) {
+        return JSON.parse(fs.readFileSync(SESSIONS_BAK, 'utf-8'));
+      }
+    } catch (inner) {}
     return {};
   }
 }
 
 function saveSessions(sessions: any) {
-  fs.writeFileSync(SESSIONS_FILE, JSON.stringify(sessions, null, 2));
+  const content = JSON.stringify(sessions, null, 2);
+  safeWriteFile(SESSIONS_FILE, SESSIONS_BAK, content);
 }
 
 function loadIssues(): any[] {
   try {
     return JSON.parse(fs.readFileSync(ISSUES_FILE, 'utf-8'));
   } catch (e) {
+    try {
+      if (fs.existsSync(ISSUES_BAK)) {
+        return JSON.parse(fs.readFileSync(ISSUES_BAK, 'utf-8'));
+      }
+    } catch (inner) {}
     return initialIssues;
   }
 }
 
 function saveIssues(issues: any[]) {
-  fs.writeFileSync(ISSUES_FILE, JSON.stringify(issues, null, 2));
+  const content = JSON.stringify(issues, null, 2);
+  safeWriteFile(ISSUES_FILE, ISSUES_BAK, content);
 }
 
 // -------------------------------------------------------------
