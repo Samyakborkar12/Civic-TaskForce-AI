@@ -1,20 +1,74 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+🚀 Civic TaskForce AI
 
-# Run and deploy your AI Studio app
+AI-powered Civic Issue Management Platform for Smarter Cities
 
-This contains everything you need to run your app locally.
+Civic TaskForce AI helps citizens report civic issues such as potholes, garbage, water leakage, broken streetlights, and more. The platform uses Google Gemini AI to intelligently classify complaints, detect duplicates, prioritize issues, and route them to the appropriate government department.
 
-View your app in AI Studio: https://ai.studio/apps/ac1f197a-9968-4828-8a35-935243c58605
+🌟 Features
+🤖 AI-powered issue classification
+📸 Photo, Voice & Text complaint reporting
+📍 GPS-based location detection
+🔄 Duplicate issue detection
+⚡ Severity-based prioritization
+👮 Officer assignment & workflow management
+📊 Analytics dashboard
+🔔 Real-time status tracking
+🌍 Multilingual AI assistance
+🛡️ Role-based Authentication (Citizen, Officer, Admin)
+🛠 Tech Stack
 
-## Run Locally
+Frontend
 
-**Prerequisites:**  Node.js
+React
+TypeScript
+Tailwind CSS
+Vite
 
+Backend
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Supabase
+Gemini API
+JWT Authentication
+bcrypt Password Hashing
+
+Database
+
+PostgreSQL (Supabase)
+
+Deployment
+
+Google Cloud Run
+Google AI Studio
+🚀 Live Demo
+
+🔗 Application
+
+https://ais-pre-4t36scdvmq4uccaplhsxvf-395536022606.asia-southeast1.run.app
+
+⚙️ Installation
+git clone <repository-url>
+
+cd civic-taskforce-ai
+
+npm install
+
+Create a .env.local
+
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+SUPABASE_URL=YOUR_SUPABASE_URL
+SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+
+Run the project
+
+npm run dev
+👥 User Roles
+👤 Citizen
+👮 Officer
+🛡️ Admin
+🎯 Vision
+
+To build a transparent, AI-powered civic governance platform that enables faster issue resolution, smarter decision-making, and better collaboration between citizens and government authorities.
+
+🏆 Built For
+
+Google AI Hackathon • Powered by Gemini API • Google Cloud
